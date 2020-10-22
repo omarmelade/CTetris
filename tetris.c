@@ -285,16 +285,6 @@ int hauteurExacte( Grille g, int colPrec, int colSuiv ){
     return plusBasse;
 }
 
-// ne fonctionne pas
-void supprimeLigne(Grille g, int ligne)
-{
-    for(int x = 0; x < LARGEUR; x++)
-    {
-        ecrireCase(g, ligne, x, ' ');
-    }
-    descendtoutesligne(g, ligne);
-}
-
 void descendtoutesligne(Grille g, int ligne)
 {
     printf("%d\n", ligne);
@@ -307,6 +297,16 @@ void descendtoutesligne(Grille g, int ligne)
             //printf("%s\n", "suppr");
         }
     }
+}
+
+// ne fonctionne pas
+void supprimeLigne(Grille g, int ligne)
+{
+    for(int x = 0; x < LARGEUR; x++)
+    {
+        ecrireCase(g, ligne, x, ' ');
+    }
+    descendtoutesligne(g, ligne);
 }
 
 // renvoie le nb de lignes nettoyer
@@ -403,6 +403,7 @@ int main()
                 printseparator();
                 printmsg("VOUS AVEZ DEPASSEZ LES LIMITES DE LA GRILLES. PERDU !");
                 printf("%s %d %s\n", "VOUS AVEZ POSE ", nbPieces, " PIECES");
+                nbPieces = 0;
                 printseparator();
                 initialiseGrille(grille);
             }
@@ -423,4 +424,3 @@ int main()
     }
     return 0;
 }
-
