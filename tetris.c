@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <string.h>
-#include "tp2_tableau.h"
+#include "tetris.h"
 
 
 // creation de mon tableau de pi�ces
@@ -152,7 +152,7 @@ void affichePiece(Piece p){
 /////////////////////////////////////
 /////////////////////////////////////
 
-void genererPiece()
+void genererPieces()
 {
 
     // piece 1
@@ -368,16 +368,17 @@ int alea(){
 
 Piece pieceAlea(Piece tab[])
 {
+    srand(time(0));
     return tab[alea()];
 }
 
 // fonction main d'appel principal du jeu
-int main()
+int main_console()
 {
 
     Grille grille;
     initialiseGrille(grille);
-    genererPiece();
+    genererPieces();
     int colonne;
     // compte le nb de pieces du jeu
     int nbPieces = 0;
@@ -388,7 +389,7 @@ int main()
         scanf( "%d", &colonne );
         if(colonne >= 0 && colonne < LARGEUR){
             int hRestant = hauteurExacte(grille, colonne, colonne+p.largeur) - p.hauteur + 1;
-            int hplat = hauteurExacte(grille, colonne, colonne+p.largeur-1);
+            //int hplat = hauteurExacte(grille, colonne, colonne+p.largeur-1);
             //printf("hauteur exacte : %d\n hauteur restante : %d\n", hplat, hRestant);
             if(hRestant >= 0){
                 ecrirePiece(grille, p, colonne, p.hauteur);

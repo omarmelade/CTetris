@@ -1,5 +1,5 @@
-#ifndef TP2_TABLEAU_H_INCLUDED
-#define TP2_TABLEAU_H_INCLUDED
+#ifndef TETRIS_H_INCLUDED
+#define TETRIS_H_INCLUDED
 
 #define HAUTEUR 10
 #define LARGEUR 15
@@ -27,7 +27,7 @@ void afficheGrille(Grille g);
 void printcarriage(int n);
 void printseparator();
 
-void genererPiece();
+void genererPieces();
 void ecrireCase(Grille g, int line, int col, char c);
 void ecrirePiece(Grille g, Piece p, int col, int hauteur);
 Piece pieceAlea(Piece tab[]);
@@ -39,4 +39,4 @@ int hauteurPlat(Grille g, int coldebut, int colfin);
 int hauteurExacte( Grille g, int col_gauche, int colSuiv );
 void supprimeLigne(Grille g, int ligne);
 
-#endif // TP2-TABLEAU_H_INCLUDED
+#endif // TETRIS_H_INCLUDED
