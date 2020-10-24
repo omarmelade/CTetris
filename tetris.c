@@ -368,7 +368,7 @@ int alea(){
 
 Piece pieceAlea(Piece tab[])
 {
-    srand(time(0));
+    //srand(time(N));
     return tab[alea()];
 }
 
