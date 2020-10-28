@@ -5,6 +5,9 @@
 
 #define TAILLE_CARRE 16
 
+#define LARGEUR_GRILLE TAILLE_CARRE*(LARGEUR+4)
+#define HAUTEUR_GRILLE TAILLE_CARRE*(HAUTEUR+7)
+
 
 ////////////////////// STRUCTURE DE LA PARTIE LOGIQUE DU JEU
 typedef struct {
@@ -59,7 +62,10 @@ int val0 = 17;
     printf("Nouvelle partie\n"); // Nouvelle partie
     return TRUE; // Tout s'est bien passé
   }
+
+
 //------------------------------------- FONCTIONS DE CREATIONS DES COMPOSANTS -------------------------------- //
+
 /// fonction qui cree un button arrow
 GtkWidget *create_arrow_button( GtkArrowType  arrow_type )
 {
@@ -80,29 +86,82 @@ GtkWidget *create_button( char* s )
     return button;
 }
 
+
 //------------------------------------- GESTION DE LA ZONE DE DESSIN -------------------------------- //
+
+void dessineFond(cairo_t* cr){
+
+  cairo_set_source_rgb (cr, 1, 1, 1); // choisit le blanc.
+  cairo_paint( cr ); // remplit tout dans la couleur choisie.
+
+}
+
+void dessineBordure(cairo_t* cr)
+{
+  // choisi la couleur
+  cairo_set_source_rgb (cr, 0.62, 0.60, 0.60);
+  // dessine la bordure de gauche
+  cairo_rectangle (cr, 0, 0, TAILLE_CARRE*2, HAUTEUR_GRILLE ); // x, y, largeur, hauteur
+
+  // dessine la bordure de droite
+  cairo_rectangle (cr, HAUTEUR_GRILLE, 0, TAILLE_CARRE*2, HAUTEUR_GRILLE ); // x, y, largeur, hauteur
+
+  // dessine la bordure du bas
+  cairo_rectangle (cr, 0, HAUTEUR_GRILLE, LARGEUR_GRILLE, -TAILLE_CARRE*2 ); // x, y, largeur, hauteur
+
+  // dessine toute les bordures
+  cairo_fill(cr);
+}
 
 // Dessine le carré de type c à la ligne et colonne spécifiée dans le
 // contexte graphique cr.
-void dessineCarre( cairo_t* cr, int ligne, int colonne, char c ){
+void dessineCarre( cairo_t* cr, int ligne, int colonne, char c )
+{
 
-    switch (c) {
-      case '|':
-        cairo_set_source_rgb (cr, 1, 1, 0);
-      case ' ':
-        cairo_set_source_rgb (cr, 1, 1, 1);
-      default:
-        cairo_set_source_rgb (cr, 0, 1, 0);
-    }
-    cairo_rectangle (cr, ligne, colonne, TAILLE_CARRE, TAILLE_CARRE ); // x, y, largeur, hauteur
+    cairo_set_source_rgb (cr, 0, 1, 0); // choisit le rouge.
+    cairo_rectangle (cr, colonne*TAILLE_CARRE+(TAILLE_CARRE*2), ligne*TAILLE_CARRE+(TAILLE_CARRE*5), TAILLE_CARRE, TAILLE_CARRE ); // x, y, largeur, hauteur
     cairo_fill_preserve( cr ); // remplit la forme actuelle (un rectangle)
-  // => "_preserve" garde la forme (le rectangle) pour la suite
+    // => "_preserve" garde la forme (le rectangle) pour la suite
 
     // trace les contours
-    cairo_set_line_width(cr, 3);
+    cairo_set_line_width(cr, 2);
     cairo_set_source_rgb (cr, 0, 0.5, 0);
+
     cairo_stroke( cr ); // trace la forme actuelle (le même rectangle)
     // => pas de "_preserve" donc la forme (le rectangle) est oublié.
+}
+
+void dessineGrille(cairo_t* cr)
+{
+  for(int i = 0; i < HAUTEUR; i++)
+  {
+    for(int j = 0; j < LARGEUR; j++)
+    {
+      dessineCarre(cr, i, j, '#');
+    }
+  }
+
+}
+
+void nouvellePiece(Jeu* pJeu)
+{
+  pJeu->piece = alea();
+  Piece piece = pJeu->tab[pJeu->piece];
+  pJeu->col = (LARGEUR-piece.largeur)/2;
+  ecrirePiece(pJeu->g, pJeu->tab[pJeu->piece], 9, piece.hauteur);
+}
+
+void dessinePiece(cairo_t* cr, Jeu* pJeu)
+{
+  Piece p = pJeu->tab[pJeu->piece];
+
+  for(int i = 0; i < p.hauteur; i++)
+  {
+    for(int j = 0; j < p.largeur; j++)
+    {
+        dessineCarre(cr, 9+i, pJeu->col+j, p.forme[i][j]);
+    }
+  }
 }
 
 
@@ -114,19 +173,20 @@ gboolean realize_evt_reaction( GtkWidget *widget, gpointer data )
 // c'est la réaction principale qui va redessiner tout.
 gboolean expose_evt_reaction( GtkWidget *widget, GdkEventExpose *event, gpointer data )
 {
-
+  // on recupere le jeu
+  Jeu* pJeu = (Jeu*) data;
+  // on defini le pointeur sur window
   cairo_t* cr = gdk_cairo_create (widget->window);
-  cairo_set_source_rgb (cr, 1, 1, 1); // choisit le blanc.
-  cairo_paint( cr ); // remplit tout dans la couleur choisie.
 
-  cairo_set_source_rgb (cr, 1, 0, 1);
-  cairo_rectangle (cr, 0, 0, TAILLE_CARRE, TAILLE_CARRE*(HAUTEUR+7) ); // x, y, largeur, hauteur
-  cairo_fill_preserve(cr);
-
-  cairo_rectangle (cr, TAILLE_CARRE*(HAUTEUR+8), 0, TAILLE_CARRE, TAILLE_CARRE*(HAUTEUR+7) ); // x, y, largeur, hauteur
-  cairo_rectangle (cr, 0, TAILLE_CARRE*(HAUTEUR+6), TAILLE_CARRE*(LARGEUR+4), TAILLE_CARRE ); // x, y, largeur, hauteur
-  cairo_fill_preserve(cr);
-
+  // on dessine le fond
+  dessineFond(cr);
+  // on dessine les bordures
+  dessineBordure(cr);
+  // on dessine un carre
+  //dessineCarre(cr, 9, 0, '#');
+  dessineGrille(cr);
+  //nouvellePiece(pJeu);
+  //dessinePiece(cr, pJeu);
   // On a fini, on peut détruire la structure.
   cairo_destroy (cr);
   return TRUE;
@@ -161,7 +221,7 @@ void creeIHM(Jeu* ptrJeu){
       // crée la zone de dessin
   GtkWidget* drawing_area = gtk_drawing_area_new ();
       // definie sa taillle
-  gtk_widget_set_size_request (drawing_area, TAILLE_CARRE*(LARGEUR+4), TAILLE_CARRE*(HAUTEUR+7));
+  gtk_widget_set_size_request (drawing_area, TAILLE_CARRE*(LARGEUR+4), HAUTEUR_GRILLE);
 
       // Rajoute la box verticale dans le conteneur window.
   gtk_container_add( GTK_CONTAINER( window ), mainVb);
@@ -223,8 +283,9 @@ int main( int   argc,
 {
 
   Jeu jeu;
+
   initialiseGrille( jeu.g );
-  genererPieces( jeu.tab );
+  genererPieces();
   //Piece p = pieceAlea(jeu.tab);
   jeu.score = 0;
   jeu.delay = 0;
