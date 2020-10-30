@@ -27,42 +27,6 @@ GtkWidget* label_delay;
 
 int val0 = 17;
 
-////////// Fonction qui fais avancer la piece a gauche
-  gboolean Gauche( GtkWidget *widget, gpointer data )
-  {
-    // Recupère la valeur passée en paramètre.
-    int val1 = * ( (int*) data );
-    printf( "Gauche, val=%d\n", val1 ); // affichera 17
-    return TRUE; // Tout s'est bien passé
-  }
-
-////////// Fonction qui fais avancer la piece a droite
-  gboolean Droite( GtkWidget *widget, gpointer data )
-  {
-    // Recupère la valeur passée en paramètre.
-    int val1 = * ( (int*) data );
-    printf( "Droite, val=%d\n", val1 ); // affichera 17
-    return TRUE; // Tout s'est bien passé
-  }
-
-////////// Fonction qui fais descendre la piece
-  gboolean Bas( GtkWidget *widget, gpointer data )
-  {
-    // Recupère la valeur passée en paramètre.
-    int val1 = * ( (int*) data );
-    printf("Bas, val=%d\n", val1 ); // affichera 17
-    return TRUE; // Tout s'est bien passé
-  }
-
-////////// Fonction qui recommence la partie
-  gboolean New( GtkWidget *widget, gpointer data )
-  {
-    // Recupère la valeur passée en paramètre.
-    // int val1 = * ( (int*) data );
-    printf("Nouvelle partie\n"); // Nouvelle partie
-    return TRUE; // Tout s'est bien passé
-  }
-
 
 //------------------------------------- FONCTIONS DE CREATIONS DES COMPOSANTS -------------------------------- //
 
@@ -118,17 +82,36 @@ void dessineBordure(cairo_t* cr)
 void dessineCarre( cairo_t* cr, int ligne, int colonne, char c )
 {
 
-    cairo_set_source_rgb (cr, 0, 1, 0); // choisit le rouge.
-    cairo_rectangle (cr, colonne*TAILLE_CARRE+(TAILLE_CARRE*2), ligne*TAILLE_CARRE+(TAILLE_CARRE*5), TAILLE_CARRE, TAILLE_CARRE ); // x, y, largeur, hauteur
-    cairo_fill_preserve( cr ); // remplit la forme actuelle (un rectangle)
-    // => "_preserve" garde la forme (le rectangle) pour la suite
+  cairo_set_source_rgb (cr, 0, 0, 0);
+  //printf("MERDE\n");
+  if(c != ' '){
+    if(c=='@')
+    {
+        cairo_set_source_rgb (cr, 0, 255, 0);
+    }else if(c=='#')
+    {
+      cairo_set_source_rgb (cr, 0, 100, 200);
 
-    // trace les contours
-    cairo_set_line_width(cr, 2);
-    cairo_set_source_rgb (cr, 0, 0.5, 0);
+    }else if(c=='I')
+    {
+        cairo_set_source_rgb (cr, 150, 0, 255);
+    }else if(c=='%'){
+        cairo_set_source_rgb (cr, 255, 100,0);
+    }else if(c=='H'){
+        cairo_set_source_rgb (cr, 0, 100, 255);
+    }
 
-    cairo_stroke( cr ); // trace la forme actuelle (le même rectangle)
-    // => pas de "_preserve" donc la forme (le rectangle) est oublié.
+      cairo_rectangle (cr, colonne, ligne, TAILLE_CARRE, TAILLE_CARRE ); // x, y, largeur, hauteur
+      cairo_fill_preserve( cr ); // remplit la forme actuelle (un rectangle)
+      // => "_preserve" garde la forme (le rectangle) pour la suite
+  }
+      // trace les contours
+      cairo_set_line_width(cr, 2);
+      cairo_set_source_rgb (cr, 0, 0, 255);
+
+      cairo_stroke( cr ); // trace la forme actuelle (le même rectangle)
+      // => pas de "_preserve" donc la forme (le rectangle) est oublié.
+
 }
 
 void dessineGrille(cairo_t* cr)
@@ -137,29 +120,26 @@ void dessineGrille(cairo_t* cr)
   {
     for(int j = 0; j < LARGEUR; j++)
     {
-      dessineCarre(cr, i, j, '#');
+      dessineCarre(cr, i*TAILLE_CARRE+(TAILLE_CARRE*5), j*TAILLE_CARRE+(TAILLE_CARRE*2), '#');
     }
   }
-
 }
 
 void nouvellePiece(Jeu* pJeu)
 {
   pJeu->piece = alea();
-  Piece piece = pJeu->tab[pJeu->piece];
-  pJeu->col = (LARGEUR-piece.largeur)/2;
-  ecrirePiece(pJeu->g, pJeu->tab[pJeu->piece], 9, piece.hauteur);
+  pJeu->col = (LARGEUR-pJeu->tab[pJeu->piece].largeur)/2;
 }
+
 
 void dessinePiece(cairo_t* cr, Jeu* pJeu)
 {
-  Piece p = pJeu->tab[pJeu->piece];
 
-  for(int i = 0; i < p.hauteur; i++)
+  for(int i = 0; i < pJeu->tab[pJeu->piece].hauteur-1; i++)
   {
-    for(int j = 0; j < p.largeur; j++)
+    for (int j = 0; j < pJeu->tab[pJeu->piece].largeur; j++)
     {
-        dessineCarre(cr, 9+i, pJeu->col+j, p.forme[i][j]);
+      dessineCarre(cr, i*TAILLE_CARRE+TAILLE_CARRE, (j+pJeu->col)*TAILLE_CARRE+(TAILLE_CARRE*2), pJeu->tab[pJeu->piece].forme[i][j]);
     }
   }
 }
@@ -171,6 +151,7 @@ gboolean realize_evt_reaction( GtkWidget *widget, gpointer data )
   return TRUE;
 }
 // c'est la réaction principale qui va redessiner tout.
+
 gboolean expose_evt_reaction( GtkWidget *widget, GdkEventExpose *event, gpointer data )
 {
   // on recupere le jeu
@@ -184,13 +165,64 @@ gboolean expose_evt_reaction( GtkWidget *widget, GdkEventExpose *event, gpointer
   dessineBordure(cr);
   // on dessine un carre
   //dessineCarre(cr, 9, 0, '#');
-  dessineGrille(cr);
-  //nouvellePiece(pJeu);
-  //dessinePiece(cr, pJeu);
+  //dessineGrille(cr);
+  dessinePiece(cr, pJeu);
   // On a fini, on peut détruire la structure.
   cairo_destroy (cr);
   return TRUE;
 }
+
+
+//------------------------------------- GESTION DES INTERACTIONS AVEC LES BOUTTONS -------------------------------- //
+////////// Fonction qui fais avancer la piece a gauche
+  gboolean Gauche( GtkWidget *widget, gpointer data )
+  {
+    // Recupère la valeur passée en paramètre.
+    Jeu* pJeu = (Jeu*) data;
+    if(pJeu->col > 0){
+      pJeu->col--;
+    }
+
+    gtk_widget_queue_draw( window );
+    return TRUE; // Tout s'est bien passé
+  }
+
+////////// Fonction qui fais avancer la piece a droite
+  gboolean Droite( GtkWidget *widget, gpointer data )
+  {
+    // Recupère la valeur passée en paramètre.
+    Jeu* pJeu = (Jeu*) data;
+    if(pJeu->col + pJeu->tab[pJeu->piece].largeur < LARGEUR){
+      pJeu->col++;
+    }
+
+    gtk_widget_queue_draw( window );
+    return TRUE; // Tout s'est bien passé
+  }
+
+////////// Fonction qui fais descendre la piece
+  gboolean Bas( GtkWidget *widget, gpointer data )
+  {
+    // Recupère la valeur passée en paramètre.
+    Jeu* pJeu = (Jeu*) data;
+
+    int hRestant = hauteurExacte(pJeu->g, pJeu->col, pJeu->col + pJeu->tab[pJeu->piece].largeur) - pJeu->tab[pJeu->piece].hauteur + 1;
+    ecrirePiece(pJeu->g, pJeu->tab[pJeu->piece], pJeu->col, hRestant);
+    //nettoyer(pJeu->g);
+    //nouvellePiece(pJeu);
+    afficheGrille(pJeu->g);
+    gtk_widget_queue_draw( window );
+    return TRUE; // Tout s'est bien passé
+  }
+
+////////// Fonction qui recommence la partie
+  gboolean New( GtkWidget *widget, gpointer data )
+  {
+    // Recupère la valeur passée en paramètre.
+    // int val1 = * ( (int*) data );
+    printf("Nouvelle partie\n"); // Nouvelle partie
+    return TRUE; // Tout s'est bien passé
+  }
 
 
 //------------------------------------- DEBUT INTERFACE ET AJOUT COMPOSANTS -------------------------------- //
@@ -256,13 +288,13 @@ void creeIHM(Jeu* ptrJeu){
         NULL);
 
   g_signal_connect( left, "clicked",
-              G_CALLBACK( Gauche ), &val0 );
+              G_CALLBACK( Gauche ), ptrJeu );
   g_signal_connect( right, "clicked",
-              G_CALLBACK( Droite ), &val0 );
+              G_CALLBACK( Droite ), ptrJeu );
   g_signal_connect( down, "clicked",
-              G_CALLBACK( Bas ), &val0 );
+              G_CALLBACK( Bas ), ptrJeu );
   g_signal_connect( new, "clicked",
-              G_CALLBACK( New ), &val0 );
+              G_CALLBACK( New ), ptrJeu );
 
 //////////////// DESSINE DANS LA DRAWING AREA ///////////////////////////
     // ... votre zone de dessin s'appelle ici "drawing_area"
@@ -285,7 +317,9 @@ int main( int   argc,
   Jeu jeu;
 
   initialiseGrille( jeu.g );
-  genererPieces();
+  genererPieces(jeu.tab);
+  nouvellePiece(&jeu);
+
   //Piece p = pieceAlea(jeu.tab);
   jeu.score = 0;
   jeu.delay = 0;
@@ -297,6 +331,7 @@ int main( int   argc,
   window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
 
   creeIHM(&jeu);
+
   /* Rentre dans la boucle d'événements. */
   /* Tapez Ctrl-C pour sortir du programme ! */
   gtk_main ();

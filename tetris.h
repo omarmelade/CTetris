@@ -27,13 +27,13 @@ void afficheGrille(Grille g);
 void printcarriage(int n);
 void printseparator();
 
-void genererPieces();
+void genererPieces(Piece tab[]);
 void ecrireCase(Grille g, int line, int col, char c);
 void ecrirePiece(Grille g, Piece p, int col, int hauteur);
 Piece pieceAlea(Piece tab[]);
 
 int alea();
-
+int nettoyer(Grille g);
 int premiereLineVideColonne(Grille g, int colonne);
 int hauteurPlat(Grille g, int coldebut, int colfin);
 int hauteurExacte( Grille g, int col_gauche, int colSuiv );

@@ -152,7 +152,7 @@ void affichePiece(Piece p){
 /////////////////////////////////////
 /////////////////////////////////////
 
-void genererPieces()
+void genererPieces(Piece tabPiece[])
 {
 
     // piece 1
@@ -175,13 +175,13 @@ void genererPieces()
     // piece 4
     tabPiece[3].hauteur = 2;
     tabPiece[3].largeur = 3;
-    tabPiece[3].forme[1] = "H";
+    tabPiece[3].forme[1] = "H  ";
     tabPiece[3].forme[0] = "HHH";
     // piece 5
     tabPiece[4].hauteur = 3;
     tabPiece[4].largeur = 2;
-    tabPiece[4].forme[2] = "#";
-    tabPiece[4].forme[1] = "#";
+    tabPiece[4].forme[2] = "# ";
+    tabPiece[4].forme[1] = "# ";
     tabPiece[4].forme[0] = "##";
 }
 
@@ -268,7 +268,9 @@ int hauteurExacte( Grille g, int colPrec, int colSuiv ){
 
     int colonne,ligne;
     int plusBasse = HAUTEUR-1; /* nb de la plus basse ligne vide*/
+    colSuiv = 3;
     for (colonne = colPrec ; colonne < colSuiv ; colonne++){
+
             for (ligne = 0; ligne < HAUTEUR; ligne++)
             {
                 if (g[ligne][colonne] != ' ')
@@ -348,7 +350,7 @@ void ecrirePiece(Grille g, Piece p, int col, int hauteur)
         {
             // j'utilise strlen pour connaitre exactement la taille de la chaine
              // je n'ai donc rien a ecrire la ou le caractère n'existe pas.
-            for(int l = 0; l < strlen(p.forme[h]); l++)
+            for(int l = 0; l < p.largeur; l++)
             {
                 ecrireCase(g, ligne-h, l+col, p.forme[h][l]);
             }
@@ -378,7 +380,8 @@ int main_console()
 
     Grille grille;
     initialiseGrille(grille);
-    genererPieces();
+    Piece tabl[ NB_PIECES ];
+    genererPieces(tabl);
     int colonne;
     // compte le nb de pieces du jeu
     int nbPieces = 0;
