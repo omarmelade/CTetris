@@ -88,16 +88,16 @@ void dessineCarre( cairo_t* cr, int ligne, int colonne, char c )
     if(c=='@')
     {
         cairo_set_source_rgb (cr, 0, 255, 0);
-    }else if(c=='#')
+    }else if(c == '#')
     {
       cairo_set_source_rgb (cr, 0, 100, 200);
 
-    }else if(c=='I')
+    }else if(c == 'I')
     {
         cairo_set_source_rgb (cr, 150, 0, 255);
-    }else if(c=='%'){
+    }else if(c == '%'){
         cairo_set_source_rgb (cr, 255, 100,0);
-    }else if(c=='H'){
+    }else if(c == 'H'){
         cairo_set_source_rgb (cr, 0, 100, 255);
     }
 
@@ -114,13 +114,13 @@ void dessineCarre( cairo_t* cr, int ligne, int colonne, char c )
 
 }
 
-void dessineGrille(cairo_t* cr)
+void dessineGrille(cairo_t* cr, Grille g)
 {
   for(int i = 0; i < HAUTEUR; i++)
   {
     for(int j = 0; j < LARGEUR; j++)
     {
-      dessineCarre(cr, i*TAILLE_CARRE+(TAILLE_CARRE*5), j*TAILLE_CARRE+(TAILLE_CARRE*2), '#');
+      dessineCarre(cr, i*TAILLE_CARRE+(TAILLE_CARRE*5), j*TAILLE_CARRE+(TAILLE_CARRE*2), lireCase(g,i,j));
     }
   }
 }
@@ -164,8 +164,8 @@ gboolean expose_evt_reaction( GtkWidget *widget, GdkEventExpose *event, gpointer
   // on dessine les bordures
   dessineBordure(cr);
   // on dessine un carre
-  //dessineCarre(cr, 9, 0, '#');
-  //dessineGrille(cr);
+  dessineGrille(cr, pJeu->g);
+
   dessinePiece(cr, pJeu);
   // On a fini, on peut détruire la structure.
   cairo_destroy (cr);
@@ -206,11 +206,11 @@ gboolean expose_evt_reaction( GtkWidget *widget, GdkEventExpose *event, gpointer
     // Recupère la valeur passée en paramètre.
     Jeu* pJeu = (Jeu*) data;
 
-    int hRestant = hauteurExacte(pJeu->g, pJeu->col, pJeu->col + pJeu->tab[pJeu->piece].largeur) - pJeu->tab[pJeu->piece].hauteur + 1;
-    ecrirePiece(pJeu->g, pJeu->tab[pJeu->piece], pJeu->col, hRestant);
-    //nettoyer(pJeu->g);
-    //nouvellePiece(pJeu);
+    //int hRestant = hauteurExacte(pJeu->g, pJeu->col, pJeu->col + pJeu->tab[pJeu->piece].largeur) - pJeu->tab[pJeu->piece].hauteur + 1;
+    ecrirePiece(pJeu->g, pJeu->tab[pJeu->piece], pJeu->col, pJeu->tab[pJeu->piece].hauteur);
     afficheGrille(pJeu->g);
+    //nettoyer(pJeu->g);
+    nouvellePiece(pJeu);
     gtk_widget_queue_draw( window );
     return TRUE; // Tout s'est bien passé
   }
@@ -218,8 +218,10 @@ gboolean expose_evt_reaction( GtkWidget *widget, GdkEventExpose *event, gpointer
 ////////// Fonction qui recommence la partie
   gboolean New( GtkWidget *widget, gpointer data )
   {
-    // Recupère la valeur passée en paramètre.
-    // int val1 = * ( (int*) data );
+    Jeu* pJeu = (Jeu*) data;
+    // initialiseGrille( pJeu->g );
+    // genererPieces(pJeu->tab);
+    // nouvellePiece(pJeu);
     printf("Nouvelle partie\n"); // Nouvelle partie
     return TRUE; // Tout s'est bien passé
   }
